@@ -14,7 +14,7 @@ module Jekyll
       def initialize(document, config)
         @jekyll_document = document
         @jekyll_l10n_config = config
-        @po_repository = Jekyll::L10n::PoRepository.new(@jekyll_l10n_config)
+        @po_repository = @jekyll_l10n_config.po_repository
       end
 
       def translate
