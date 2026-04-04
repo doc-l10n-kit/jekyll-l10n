@@ -20,6 +20,11 @@ module Jekyll
         @jekyll_config&.[]('l10n')&.[]('po')&.[]('baseDir') || ENV['L10N_PO_BASE_DIR']
       end
 
+      # Shared PoRepository instance to avoid duplicate PO file loading
+      def po_repository
+        @po_repository ||= Jekyll::L10n::PoRepository.new(self)
+      end
+
     end
   end
 end

@@ -10,7 +10,7 @@ module Jekyll
 
       def initialize(options)
         @jekyll_l10n_config = options[:jekyll_l10n_config]
-        @po_repository = Jekyll::L10n::PoRepository.new(@jekyll_l10n_config)
+        @po_repository = @jekyll_l10n_config.po_repository
         super(options)
       end
 
