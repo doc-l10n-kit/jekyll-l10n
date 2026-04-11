@@ -1,11 +1,11 @@
 # frozen_string_literal: true
 
-require_relative 'abstract_sentence'
+require_relative 'abstract_translatable_unit'
 
 module Jekyll
   module L10n
     module Model
-      class SectionTitle < AbstractSentence
+      class SectionTitle < AbstractTranslatableUnit
 
         def text
           @node.instance_variable_get('@title')

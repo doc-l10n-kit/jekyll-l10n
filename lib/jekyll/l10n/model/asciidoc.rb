@@ -2,7 +2,7 @@
 
 require 'asciidoctor/document'
 require 'asciidoctor/table'
-require_relative 'sentence'
+require_relative 'translatable_unit'
 require_relative 'document_title'
 require_relative 'block_title'
 require_relative 'section_title'
@@ -21,98 +21,98 @@ module Jekyll
           @document = document
         end
 
-        def extract_sentences
-          sentences = []
+        def extract_units
+          units = []
 
-          walk_node(@document, sentences)
+          walk_node(@document, units)
 
 
-          sentences
+          units
         end
 
-        private def walk_node(node, sentences)
+        private def walk_node(node, units)
           if node.is_a? Array
             node.each do |item|
-              walk_node(item, sentences)
+              walk_node(item, units)
             end
             return nil
           end
           if node.is_a? Asciidoctor::Document
             node.blocks.each do |block|
-              walk_node(block, sentences)
+              walk_node(block, units)
             end
             return nil
           end
           if node.is_a? Asciidoctor::Section
-            sentence = SectionTitle.new(node)
-            if sentence.text != nil && sentence.text.empty? == false
-              sentences.append(sentence)
+            unit = SectionTitle.new(node)
+            if unit.text != nil && unit.text.empty? == false
+              units.append(unit)
             end
             node.blocks.each do |block|
-              walk_node(block, sentences)
+              walk_node(block, units)
             end
             return nil
           end
           if node.is_a? Asciidoctor::Block
             # title
-            sentence = BlockTitle.new(node)
-            if sentence.text != nil && sentence.text.empty? == false
-              sentences.append(sentence)
+            unit = BlockTitle.new(node)
+            if unit.text != nil && unit.text.empty? == false
+              units.append(unit)
             end
 
             # body
-            sentence = Block.new(node)
-            if sentence.text != nil && sentence.text.empty? == false && sentence.node.style != 'source'
-              sentences.append(sentence)
+            unit = Block.new(node)
+            if unit.text != nil && unit.text.empty? == false && unit.node.style != 'source'
+              units.append(unit)
             end
             node.blocks.each do |block|
-              walk_node(block, sentences)
+              walk_node(block, units)
             end
             return nil
           end
           if node.is_a? Asciidoctor::Table
-            sentence = TableTitle.new(node)
-            if sentence.text != nil && sentence.text.empty? == false
-              sentences.append(sentence)
+            unit = TableTitle.new(node)
+            if unit.text != nil && unit.text.empty? == false
+              units.append(unit)
             end
             node.rows.head.each do |cell|
-              walk_node(cell, sentences)
+              walk_node(cell, units)
             end
             node.rows.body.each do |cell|
-              walk_node(cell, sentences)
+              walk_node(cell, units)
             end
             node.rows.foot.each do |cell|
-              walk_node(cell, sentences)
+              walk_node(cell, units)
             end
             return nil
           end
           if node.is_a? Asciidoctor::Table::Cell
-            sentence = Cell.new(node)
-            if sentence.text != nil && sentence.text.empty? == false
-              sentences.append(sentence)
+            unit = Cell.new(node)
+            if unit.text != nil && unit.text.empty? == false
+              units.append(unit)
             end
             node.blocks.each do |block|
-              walk_node(block, sentences)
+              walk_node(block, units)
             end
             return nil
           end
           if node.is_a? Asciidoctor::List
-            sentence = ListTitle.new(node)
-            if sentence.text != nil && sentence.text.empty? == false
-              sentences.append(sentence)
+            unit = ListTitle.new(node)
+            if unit.text != nil && unit.text.empty? == false
+              units.append(unit)
             end
             node.blocks.each do |block|
-              walk_node(block, sentences)
+              walk_node(block, units)
             end
             return nil
           end
           if node.is_a? Asciidoctor::ListItem
-            sentence = ListItem.new(node)
-            if sentence.text != nil && sentence.text.empty? == false
-              sentences.append(sentence)
+            unit = ListItem.new(node)
+            if unit.text != nil && unit.text.empty? == false
+              units.append(unit)
             end
             node.blocks.each do |block|
-              walk_node(block, sentences)
+              walk_node(block, units)
             end
             return nil
           end

@@ -22,14 +22,14 @@ module Jekyll
 
       def translate(document)
         asciidoc = Jekyll::L10n::Model::Asciidoc.new(document)
-        sentences = asciidoc.extract_sentences
-        sentences.each do |sentence|
+        units = asciidoc.extract_units
+        units.each do |unit|
 
-          po_file_path = Jekyll::L10n::Util.resolve_po_path(sentence.source, @jekyll_l10n_config.po_base_dir)
+          po_file_path = Jekyll::L10n::Util.resolve_po_path(unit.source, @jekyll_l10n_config.po_base_dir)
           po = @po_repository.load_file(po_file_path.to_path)
-          translated = po[sentence.text]
+          translated = po[unit.text]
           unless translated.nil?
-            sentence.text = translated
+            unit.text = translated
           end
         end
       end

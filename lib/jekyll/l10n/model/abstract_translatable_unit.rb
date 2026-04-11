@@ -1,11 +1,11 @@
 # frozen_string_literal: true
 
-require_relative 'sentence'
+require_relative 'translatable_unit'
 
 module Jekyll
   module L10n
     module Model
-      class AbstractSentence < Sentence
+      class AbstractTranslatableUnit < TranslatableUnit
 
         def initialize(node)
           @node = node

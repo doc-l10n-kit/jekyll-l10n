@@ -3,7 +3,7 @@
 module Jekyll
   module L10n
     module Model
-      class Sentence
+      class TranslatableUnit
 
         def source
           raise "not implemented"

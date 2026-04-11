@@ -1,11 +1,11 @@
 # frozen_string_literal: true
 
-require_relative 'abstract_sentence'
+require_relative 'translatable_unit'
 
 module Jekyll
   module L10n
     module Model
-      class DocumentTitle < Sentence
+      class DocumentTitle < TranslatableUnit
 
         def initialize(jekyll_document)
           @jekyll_document = jekyll_document

@@ -61,20 +61,20 @@ X-Generator: jekyll-l10n
         end
 
 
-        def update_entries(sentences)
+        def update_entries(units)
           entries = []
-          sentences.each do |sentence|
-            entry = @po[sentence.text]
+          units.each do |unit|
+            entry = @po[unit.text]
             if entry.nil?
-              entry = @secondary_index[sentence.text]
+              entry = @secondary_index[unit.text]
             end
 
             if entry.nil?
               entry = GetText::POEntry.new(:normal)
-              entry.msgid = sentence.text
+              entry.msgid = unit.text
             end
 
-            entry.references = [sentence.source]
+            entry.references = [unit.source]
             entries.append(entry)
           end
 
