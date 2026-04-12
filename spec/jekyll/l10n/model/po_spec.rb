@@ -18,9 +18,12 @@ describe Jekyll::L10n::Model::Po do
     po = @po_repository.load_file(po_file_path.to_path)
 
     expect(po).not_to be_nil
-    expect(po["Sample Guide"]).to eq "サンプルガイド"
-    expect(po["This is a sample text."]).to eq "これはサンプルテキストです。"
-    expect(po["This is a second paragraph."]).to eq "これは2段落目です。"
+    entry = po["Sample Guide"]
+    expect(entry).not_to be_nil
+    expect(entry.msgstr).to eq "サンプルガイド"
+    expect(entry.fuzzy?).to be false
+    expect(po["This is a sample text."].msgstr).to eq "これはサンプルテキストです。"
+    expect(po["This is a second paragraph."].msgstr).to eq "これは2段落目です。"
   end
 
   it 'can update entries from extracted units' do
@@ -45,12 +48,35 @@ describe Jekyll::L10n::Model::Po do
     expect(po[""]).to be_nil
   end
 
-  it 'returns nil for a fuzzy entry' do
+  it 'returns a fuzzy entry with fuzzy? flag' do
     po_file_path = @spec_dir.join('sample/po/fuzzy.adoc.po')
     po = @po_repository.load_file(po_file_path.to_path)
 
     expect(po).not_to be_nil
-    expect(po["Sample Guide"]).to be_nil
+    entry = po["Sample Guide"]
+    expect(entry).not_to be_nil
+    expect(entry.fuzzy?).to be true
+    expect(entry.msgstr).to eq "サンプルガイド"
+  end
+
+  it 'returns mt engine from extracted comment' do
+    po_file_path = @spec_dir.join('sample/po/fuzzy-mt-gemini.adoc.po')
+    po = @po_repository.load_file(po_file_path.to_path)
+
+    expect(po).not_to be_nil
+    entry = po["Sample Guide"]
+    expect(entry).not_to be_nil
+    expect(entry.fuzzy?).to be true
+    expect(entry.mt).to eq "gemini"
+    expect(entry.msgstr).to eq "サンプルガイド"
+  end
+
+  it 'returns nil for mt when no mt comment' do
+    po_file_path = @spec_dir.join('sample/po/sample.adoc.po')
+    po = @po_repository.load_file(po_file_path.to_path)
+
+    entry = po["Sample Guide"]
+    expect(entry.mt).to be_nil
   end
 
 end

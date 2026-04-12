@@ -14,6 +14,14 @@ class TestConfig
     Pathname.new("sample/po").expand_path(File.dirname(File.dirname(__FILE__))).to_path
   end
 
+  def accept_mt
+    @accept_mt || []
+  end
+
+  def accept_mt=(value)
+    @accept_mt = value
+  end
+
   def po_repository
     @po_repository ||= Jekyll::L10n::PoRepository.new(self)
   end

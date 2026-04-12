@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 require 'gettext/po_parser'
+require_relative '../../../gettext/po_entry_ext'
 
 module Jekyll
   module L10n
@@ -20,7 +21,7 @@ module Jekyll
           @po = load_po_object(path)
           @secondary_index = {}
           @po.each do |entry|
-            if entry.msgid.class == String
+            if entry.msgid.is_a?(String)
               normalized_message_id = entry.msgid.gsub(".\n", ".  ").gsub("\n", " ")
               @secondary_index[normalized_message_id] = entry
             end
@@ -48,12 +49,7 @@ X-Generator: jekyll-l10n
             return nil
           end
           if @po.has_key? key
-            entry = @po[nil, key]
-            if entry.fuzzy?
-              return nil
-            else
-              return @po[nil, key].msgstr
-            end
+            @po[nil, key]
           else
             logger.warn("msgid #{key.inspect} is not found in the po file.")
             nil
@@ -74,7 +70,7 @@ X-Generator: jekyll-l10n
               entry.msgid = unit.text
             end
 
-            entry.references = [unit.source]
+            entry.references = [unit.source_path]
             entries.append(entry)
           end
 
