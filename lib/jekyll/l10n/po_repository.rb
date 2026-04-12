@@ -15,7 +15,7 @@ module Jekyll
 
       def load_file(path)
         po = @po_map[path.to_sym]
-        if po == nil # new file path
+        if po.nil? # new file path
           if Pathname.new(path).exist?
             po = Jekyll::L10n::Model::Po.new(path, @po_base_dir)
             @po_map[path.to_sym] = po

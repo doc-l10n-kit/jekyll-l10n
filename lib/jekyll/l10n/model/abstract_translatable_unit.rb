@@ -11,11 +11,11 @@ module Jekyll
           @node = node
         end
 
-        def source
+        def source_path
           # look up actual file the node belongs
           source_location = @node.source_location
           parent = @node.parent
-          while source_location == nil && parent != nil
+          while source_location.nil? && !parent.nil?
             source_location = parent.source_location
             parent = parent.parent
           end

@@ -5,7 +5,7 @@ module Jekyll
     module Model
       class TranslatableUnit
 
-        def source
+        def source_path
           raise "not implemented"
         end
 

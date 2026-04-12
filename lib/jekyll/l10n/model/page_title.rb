@@ -11,7 +11,7 @@ module Jekyll
           @jekyll_page = jekyll_page
         end
 
-        def source
+        def source_path
           file = @jekyll_page.path
           Pathname(file).to_path
         end

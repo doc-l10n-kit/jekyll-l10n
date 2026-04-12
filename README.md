@@ -37,7 +37,7 @@ Add to your `_config.yml`:
 l10n:
   mode: update_po    # or 'translate'
   po:
-    baseDir: _l10n   # directory for PO files
+    base_dir: _l10n  # directory for PO files
 ```
 
 Alternatively, use environment variables:

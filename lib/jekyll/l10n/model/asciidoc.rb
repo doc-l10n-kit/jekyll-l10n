@@ -45,7 +45,7 @@ module Jekyll
           end
           if node.is_a? Asciidoctor::Section
             unit = SectionTitle.new(node)
-            if unit.text != nil && unit.text.empty? == false
+            if unit.text && !unit.text.empty?
               units.append(unit)
             end
             node.blocks.each do |block|
@@ -56,13 +56,13 @@ module Jekyll
           if node.is_a? Asciidoctor::Block
             # title
             unit = BlockTitle.new(node)
-            if unit.text != nil && unit.text.empty? == false
+            if unit.text && !unit.text.empty?
               units.append(unit)
             end
 
             # body
             unit = Block.new(node)
-            if unit.text != nil && unit.text.empty? == false && unit.node.style != 'source'
+            if unit.text && !unit.text.empty? && unit.node.style != 'source'
               units.append(unit)
             end
             node.blocks.each do |block|
@@ -72,7 +72,7 @@ module Jekyll
           end
           if node.is_a? Asciidoctor::Table
             unit = TableTitle.new(node)
-            if unit.text != nil && unit.text.empty? == false
+            if unit.text && !unit.text.empty?
               units.append(unit)
             end
             node.rows.head.each do |cell|
@@ -88,7 +88,7 @@ module Jekyll
           end
           if node.is_a? Asciidoctor::Table::Cell
             unit = Cell.new(node)
-            if unit.text != nil && unit.text.empty? == false
+            if unit.text && !unit.text.empty?
               units.append(unit)
             end
             node.blocks.each do |block|
@@ -98,7 +98,7 @@ module Jekyll
           end
           if node.is_a? Asciidoctor::List
             unit = ListTitle.new(node)
-            if unit.text != nil && unit.text.empty? == false
+            if unit.text && !unit.text.empty?
               units.append(unit)
             end
             node.blocks.each do |block|
@@ -108,7 +108,7 @@ module Jekyll
           end
           if node.is_a? Asciidoctor::ListItem
             unit = ListItem.new(node)
-            if unit.text != nil && unit.text.empty? == false
+            if unit.text && !unit.text.empty?
               units.append(unit)
             end
             node.blocks.each do |block|

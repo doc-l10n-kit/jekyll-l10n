@@ -31,7 +31,7 @@ module Jekyll
                 extract_document_units(jekyll_document) + asciidoc.extract_units
 
               units.each do |unit|
-                unit_document_path = unit.source
+                unit_document_path = unit.source_path
                 po_file_path = Jekyll::L10n::Util.resolve_po_path(unit_document_path, @jekyll_l10n_config.po_base_dir).to_path
                 list = map[po_file_path]
                 if list.nil?
@@ -57,7 +57,7 @@ module Jekyll
                 extract_page_units(jekyll_page) + asciidoc.extract_units
 
               units.each do |unit|
-                unit_document_path = unit.source
+                unit_document_path = unit.source_path
                 po_file_path = Jekyll::L10n::Util.resolve_po_path(unit_document_path, @jekyll_l10n_config.po_base_dir).to_path
                 list = map[po_file_path]
                 if list.nil?
@@ -93,13 +93,13 @@ module Jekyll
       def extract_document_units(jekyll_document)
         [ Jekyll::L10n::Model::DocumentTitle.new(jekyll_document),
           Jekyll::L10n::Model::DocumentSynopsis.new(jekyll_document) ]
-          .filter{ |unit| unit.text.nil? == false }
+          .filter{ |unit| !unit.text.nil? }
       end
 
       def extract_page_units(jekyll_page)
         [ Jekyll::L10n::Model::PageTitle.new(jekyll_page),
           Jekyll::L10n::Model::PageIntro.new(jekyll_page) ]
-          .filter{ |unit| unit.text.nil? == false }
+          .filter{ |unit| !unit.text.nil? }
       end
 
     end

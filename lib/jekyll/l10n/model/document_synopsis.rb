@@ -11,7 +11,7 @@ module Jekyll
           @jekyll_document = jekyll_document
         end
 
-        def source
+        def source_path
           file = @jekyll_document.data['document'].attributes['docfile']
           site_source = @jekyll_document.data['document'].attributes['site-source']
           Pathname(file).relative_path_from(site_source).to_path

@@ -11,7 +11,7 @@ module Jekyll
           @jekyll_document = jekyll_document
         end
 
-        def source
+        def source_path
           @jekyll_document.relative_path
         end
 
