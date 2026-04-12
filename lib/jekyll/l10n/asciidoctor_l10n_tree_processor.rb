@@ -30,7 +30,7 @@ module Jekyll
           po = @po_repository.load_file(po_file_path.to_path)
           entry = po[unit.text]
           unless entry.nil?
-            if !entry.fuzzy? || accept_mt.include?(entry.mt)
+            if (!entry.fuzzy? || accept_mt.include?(entry.mt)) && entry.msgstr && !entry.msgstr.empty?
               unit.text = entry.msgstr
             end
           end
