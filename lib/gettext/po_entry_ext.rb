@@ -4,6 +4,11 @@ require 'gettext/po_entry'
 
 module GetText
   class POEntry
+    # Returns true if this entry has a non-empty translation.
+    def translated?
+      !msgstr.nil? && !msgstr.empty?
+    end
+
     # Returns the machine translation engine name from extracted comments.
     # Looks for a comment line matching "mt: <engine>" (e.g., "mt: gemini", "mt: deepl").
     # Returns the engine name as a String, or nil if not found.

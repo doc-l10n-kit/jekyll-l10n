@@ -33,11 +33,15 @@ module Jekyll
       def resolve_translation(po, text, accept_mt)
         entry = po[text]
         return text if entry.nil?
-        if (!entry.fuzzy? || accept_mt.include?(entry.mt)) && entry.msgstr && !entry.msgstr.empty?
+        if usable_translation?(entry, accept_mt)
           entry.msgstr
         else
           text
         end
+      end
+
+      def usable_translation?(entry, accept_mt)
+        entry.translated? && (!entry.fuzzy? || accept_mt.include?(entry.mt))
       end
 
     end
