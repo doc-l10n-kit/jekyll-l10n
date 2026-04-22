@@ -79,4 +79,104 @@ describe Jekyll::L10n::Model::Po do
     expect(entry.mt).to be_nil
   end
 
+  it 'adds type comments to entries' do
+    require 'tempfile'
+
+    # Create a temporary PO file to test with
+    temp_file = Tempfile.new(['test', '.po'])
+    temp_file.write(<<~PO)
+      msgid ""
+      msgstr ""
+      "Language: ja_JP\\n"
+      "MIME-Version: 1.0\\n"
+      "Content-Type: text/plain; charset=UTF-8\\n"
+      "Content-Transfer-Encoding: 8bit\\n"
+      "X-Generator: jekyll-l10n\\n"
+
+      #: sample.adoc
+      msgid "Sample Title"
+      msgstr "サンプルタイトル"
+
+      #: sample.adoc
+      msgid "Sample text content"
+      msgstr "サンプルテキスト"
+    PO
+    temp_file.close
+
+    po = @po_repository.load_file(temp_file.path)
+
+    # Create mock units with type comments
+    section_unit = double("SectionTitle",
+      text: "Sample Title",
+      source_path: "sample.adoc",
+      type_comment: "type: Title ="
+    )
+
+    block_unit = double("Block",
+      text: "Sample text content",
+      source_path: "sample.adoc",
+      type_comment: "type: Plain text"
+    )
+
+    po.update_entries([section_unit, block_unit])
+
+    # Check section title has correct type
+    entry = po["Sample Title"]
+    expect(entry).not_to be_nil
+    expect(entry.extracted_comment).to eq("type: Title =")
+    expect(entry.msgstr).to eq("サンプルタイトル")
+
+    # Check plain text has correct type
+    entry = po["Sample text content"]
+    expect(entry).not_to be_nil
+    expect(entry.extracted_comment).to eq("type: Plain text")
+    expect(entry.msgstr).to eq("サンプルテキスト")
+
+    temp_file.unlink
+  end
+
+  it 'preserves existing mt comment while updating type' do
+    require 'tempfile'
+    require 'gettext/po'
+
+    # Create a temporary PO file with mt: comment
+    temp_file = Tempfile.new(['test', '.po'])
+    temp_file.write(<<~PO)
+      msgid ""
+      msgstr ""
+      "Language: ja_JP\\n"
+      "MIME-Version: 1.0\\n"
+      "Content-Type: text/plain; charset=UTF-8\\n"
+      "Content-Transfer-Encoding: 8bit\\n"
+      "X-Generator: jekyll-l10n\\n"
+
+      #. type: delimited block -
+      #. mt: gemini
+      #: sample.adoc
+      msgid "Test content"
+      msgstr "テストコンテンツ"
+    PO
+    temp_file.close
+
+    po = @po_repository.load_file(temp_file.path)
+
+    # Create a mock unit that returns "Test content" with type comment
+    unit = double("Block",
+      text: "Test content",
+      source_path: "sample.adoc",
+      type_comment: "type: Plain text"
+    )
+
+    po.update_entries([unit])
+
+    entry = po["Test content"]
+    expect(entry).not_to be_nil
+    expect(entry.extracted_comment).to include("type: Plain text")
+    expect(entry.extracted_comment).to include("mt: gemini")
+    expect(entry.extracted_comment).not_to include("type: delimited block -")
+    expect(entry.msgstr).to eq("テストコンテンツ")
+
+    temp_file.unlink
+  end
+
 end

@@ -14,6 +14,10 @@ module Jekyll
         def text=(value)
           @node.text = value
         end
+
+        def type_comment
+          "type: Plain text"
+        end
       end
     end
   end

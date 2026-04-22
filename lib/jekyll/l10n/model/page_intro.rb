@@ -28,6 +28,10 @@ module Jekyll
           @jekyll_page.data['intro'] = value
         end
 
+        def type_comment
+          "type: YAML Front Matter: intro"
+        end
+
       end
     end
   end

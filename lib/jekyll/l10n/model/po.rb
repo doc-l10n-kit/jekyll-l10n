@@ -71,6 +71,13 @@ X-Generator: jekyll-l10n
             end
 
             entry.references = [unit.source_path]
+
+            # Set type comment
+            type_comment = unit.type_comment
+            if type_comment
+              entry.extracted_comment = merge_extracted_comment(entry.extracted_comment, type_comment)
+            end
+
             entries.append(entry)
           end
 
@@ -81,6 +88,17 @@ X-Generator: jekyll-l10n
             po[entry.msgid] = entry
           end
           @po = po
+        end
+
+        private def merge_extracted_comment(existing_comment, type_comment)
+          return type_comment if existing_comment.nil? || existing_comment.empty?
+
+          # Remove old type: line if present, keep other lines (e.g., mt: gemini)
+          lines = existing_comment.split("\n")
+          non_type_lines = lines.reject { |line| line.start_with?("type:") }
+
+          # Prepend new type comment
+          [type_comment, *non_type_lines].join("\n")
         end
 
         def write(file)

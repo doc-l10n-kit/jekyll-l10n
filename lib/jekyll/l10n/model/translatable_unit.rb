@@ -21,6 +21,10 @@ module Jekyll
           raise "not implemented"
         end
 
+        def type_comment
+          nil  # Default: no type comment
+        end
+
         def inspect
           "#{lineno}: #{text.inspect}"
         end

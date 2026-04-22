@@ -15,6 +15,11 @@ module Jekyll
           @node.title = value
         end
 
+        def type_comment
+          level = @node.level
+          "type: Title #{'=' * level}"
+        end
+
       end
     end
   end

@@ -16,6 +16,10 @@ module Jekyll
           @node.instance_variable_set('@lines', lines)
         end
 
+        def type_comment
+          "type: Plain text"
+        end
+
       end
     end
   end

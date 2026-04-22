@@ -27,6 +27,10 @@ module Jekyll
           @jekyll_document.data['title'] = value
         end
 
+        def type_comment
+          "type: YAML Front Matter: title"
+        end
+
       end
     end
   end

@@ -14,6 +14,10 @@ module Jekyll
         def text=(value)
           @node.title = value
         end
+
+        def type_comment
+          "type: Block title"
+        end
       end
     end
   end

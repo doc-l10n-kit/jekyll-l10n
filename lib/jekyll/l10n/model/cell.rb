@@ -14,7 +14,11 @@ module Jekyll
         def text=(value)
           @node.instance_variable_set('@text', value)
         end
-        
+
+        def type_comment
+          "type: Table"
+        end
+
       end
     end
   end
