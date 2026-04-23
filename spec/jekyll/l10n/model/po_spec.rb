@@ -179,4 +179,110 @@ describe Jekyll::L10n::Model::Po do
     temp_file.unlink
   end
 
+  it 'updates msgid when upstream text changes (e.g., newline removed) while preserving translation' do
+    require 'tempfile'
+
+    # Create a temporary PO file with a msgid containing a newline
+    temp_file = Tempfile.new(['test', '.po'])
+    temp_file.write(<<~PO)
+      msgid ""
+      msgstr ""
+      "Language: ja_JP\\n"
+      "MIME-Version: 1.0\\n"
+      "Content-Type: text/plain; charset=UTF-8\\n"
+      "Content-Transfer-Encoding: 8bit\\n"
+      "X-Generator: jekyll-l10n\\n"
+
+      #. type: Plain text
+      #: sample.adoc
+      msgid ""
+      "The following extracts a value identified by the `keyName` field from "
+      "the `my-config-map` ConfigMap into a `foo`\\n"
+      "environment variable:"
+      msgstr "以下は、 `my-config-map` ConfigMap から `keyName` フィールドで識別される値を `foo` 環境変数に抽出したものです。"
+    PO
+    temp_file.close
+
+    po = @po_repository.load_file(temp_file.path)
+
+    # Verify old msgid exists (with newline)
+    old_msgid = "The following extracts a value identified by the `keyName` field from the `my-config-map` ConfigMap into a `foo`\nenvironment variable:"
+    entry = po[old_msgid]
+    expect(entry).not_to be_nil
+    expect(entry.msgstr).to eq("以下は、 `my-config-map` ConfigMap から `keyName` フィールドで識別される値を `foo` 環境変数に抽出したものです。")
+
+    # Simulate upstream change: newline removed
+    new_msgid = "The following extracts a value identified by the `keyName` field from the `my-config-map` ConfigMap into a `foo` environment variable:"
+
+    # Create a mock unit with the new text (no newline)
+    unit = double("Block",
+      text: new_msgid,
+      source_path: "sample.adoc",
+      type_comment: "type: Plain text"
+    )
+
+    po.update_entries([unit])
+
+    # Verify new msgid exists (without newline)
+    entry = po[new_msgid]
+    expect(entry).not_to be_nil
+    expect(entry.msgid).to eq(new_msgid)
+    expect(entry.msgstr).to eq("以下は、 `my-config-map` ConfigMap から `keyName` フィールドで識別される値を `foo` 環境変数に抽出したものです。")
+
+    # Verify old msgid no longer exists
+    entry_old = po[old_msgid]
+    expect(entry_old).to be_nil
+
+    temp_file.unlink
+  end
+
+  it 'handles normalization correctly: period-newline becomes period-double-space' do
+    require 'tempfile'
+
+    # Create a temporary PO file with a msgid containing ".\n"
+    temp_file = Tempfile.new(['test', '.po'])
+    temp_file.write(<<~PO)
+      msgid ""
+      msgstr ""
+      "Language: ja_JP\\n"
+      "MIME-Version: 1.0\\n"
+      "Content-Type: text/plain; charset=UTF-8\\n"
+      "Content-Transfer-Encoding: 8bit\\n"
+      "X-Generator: jekyll-l10n\\n"
+
+      #: sample.adoc
+      msgid ""
+      "First sentence.\\n"
+      "Second sentence."
+      msgstr "最初の文。2番目の文。"
+    PO
+    temp_file.close
+
+    po = @po_repository.load_file(temp_file.path)
+
+    # Verify old msgid exists
+    old_msgid = "First sentence.\nSecond sentence."
+    entry = po[old_msgid]
+    expect(entry).not_to be_nil
+
+    # Simulate upstream change: ".\n" becomes ".  " (period + double space)
+    new_msgid = "First sentence.  Second sentence."
+
+    unit = double("Block",
+      text: new_msgid,
+      source_path: "sample.adoc",
+      type_comment: "type: Plain text"
+    )
+
+    po.update_entries([unit])
+
+    # Verify new msgid exists (with double space)
+    entry = po[new_msgid]
+    expect(entry).not_to be_nil
+    expect(entry.msgid).to eq(new_msgid)
+    expect(entry.msgstr).to eq("最初の文。2番目の文。")
+
+    temp_file.unlink
+  end
+
 end

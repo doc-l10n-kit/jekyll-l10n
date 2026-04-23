@@ -18,12 +18,12 @@ module Jekyll
             raise "Parent directory #{dirname} doesn't exist."
           end
 
-          @po = load_po_object(path)
-          @secondary_index = {}
-          @po.each do |entry|
+          @msgid_exact_map = load_po_object(path)
+          @msgid_normalized_map = {}
+          @msgid_exact_map.each do |entry|
             if entry.msgid.is_a?(String)
               normalized_message_id = entry.msgid.gsub(".\n", ".  ").gsub("\n", " ")
-              @secondary_index[normalized_message_id] = entry
+              @msgid_normalized_map[normalized_message_id] = entry
             end
           end
           header = GetText::POEntry.new(:normal)
@@ -36,8 +36,8 @@ Content-Transfer-Encoding: 8bit
 X-Generator: jekyll-l10n
           EOS
 
-          unless @po.has_key?(header.msgid)
-            @po[header.msgid] = header
+          unless @msgid_exact_map.has_key?(header.msgid)
+            @msgid_exact_map[header.msgid] = header
           end
 
         end
@@ -48,8 +48,8 @@ X-Generator: jekyll-l10n
           if key.nil? || key.empty?
             return nil
           end
-          if @po.has_key? key
-            @po[nil, key]
+          if @msgid_exact_map.has_key? key
+            @msgid_exact_map[nil, key]
           else
             logger.warn("msgid #{key.inspect} is not found in the po file.")
             nil
@@ -60,9 +60,14 @@ X-Generator: jekyll-l10n
         def update_entries(units)
           entries = []
           units.each do |unit|
-            entry = @po[unit.text]
+            entry = @msgid_exact_map[unit.text]
             if entry.nil?
-              entry = @secondary_index[unit.text]
+              entry = @msgid_normalized_map[unit.text]
+              if entry
+                # Found via normalized map - update msgid to match current upstream text
+                # while preserving the translation (msgstr)
+                entry.msgid = unit.text
+              end
             end
 
             if entry.nil?
@@ -82,12 +87,12 @@ X-Generator: jekyll-l10n
           end
 
 
-          po = GetText::PO.new(@po.order)
-          po[""] = @po[""] # copy header
+          po = GetText::PO.new(@msgid_exact_map.order)
+          po[""] = @msgid_exact_map[""] # copy header
           entries.each do |entry|
             po[entry.msgid] = entry
           end
-          @po = po
+          @msgid_exact_map = po
         end
 
         private def merge_extracted_comment(existing_comment, type_comment)
@@ -102,7 +107,7 @@ X-Generator: jekyll-l10n
         end
 
         def write(file)
-          file.write(@po.to_s)
+          file.write(@msgid_exact_map.to_s)
         end
 
         def inspect
