@@ -44,6 +44,23 @@ describe Jekyll::L10n::DocumentProcessor do
     expect(data['synopsis']).to eq 'Untranslated synopsis'
   end
 
+  it 'keeps original values when PO file does not exist' do
+    jekyll_document = double("jekyll_document")
+    data = {
+      'asciidoc' => true,
+      'title' => 'Some Title',
+      'synopsis' => 'Some synopsis'
+    }
+    allow(jekyll_document).to receive(:data).and_return(data)
+    allow(jekyll_document).to receive(:relative_path).and_return('nonexistent.adoc')
+
+    processor = Jekyll::L10n::DocumentProcessor.new(jekyll_document, @config)
+    processor.translate
+
+    expect(data['title']).to eq 'Some Title'
+    expect(data['synopsis']).to eq 'Some synopsis'
+  end
+
   it 'skips non-asciidoc documents' do
     jekyll_document = double("jekyll_document")
     data = {

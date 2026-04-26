@@ -28,6 +28,7 @@ module Jekyll
 
           po_file_path = Jekyll::L10n::Util.resolve_po_path(unit.source_path, @jekyll_l10n_config.po_base_dir)
           po = @po_repository.load_file(po_file_path.to_path)
+          next if po.nil?
           entry = po[unit.text]
           unless entry.nil?
             if usable_translation?(entry, accept_mt)
