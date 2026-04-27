@@ -18,7 +18,8 @@ module Jekyll
       end
 
       def translate
-        if @jekyll_document.data['asciidoc']
+        data = @jekyll_document.data
+        if data && data['asciidoc']
           document_path = @jekyll_document.relative_path
           po_file_path = Jekyll::L10n::Util.resolve_po_path(document_path, @jekyll_l10n_config.po_base_dir)
           po = @po_repository.load_file(po_file_path.to_path)
