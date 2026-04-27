@@ -1,17 +1,17 @@
 # frozen_string_literal: true
 
-require_relative 'abstract_sentence'
+require_relative 'translatable_unit'
 
 module Jekyll
   module L10n
     module Model
-      class PageIntro < Sentence
+      class PageIntro < TranslatableUnit
 
         def initialize(jekyll_page)
           @jekyll_page = jekyll_page
         end
 
-        def source
+        def source_path
           file = @jekyll_page.path
           Pathname(file).to_path
         end
@@ -26,6 +26,10 @@ module Jekyll
 
         def text=(value)
           @jekyll_page.data['intro'] = value
+        end
+
+        def type_comment
+          "type: YAML Front Matter: intro"
         end
 
       end

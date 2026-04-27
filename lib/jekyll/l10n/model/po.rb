@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 require 'gettext/po_parser'
+require_relative '../../../gettext/po_entry_ext'
 
 module Jekyll
   module L10n
@@ -17,12 +18,12 @@ module Jekyll
             raise "Parent directory #{dirname} doesn't exist."
           end
 
-          @po = load_po_object(path)
-          @secondary_index = {}
-          @po.each do |entry|
-            if entry.msgid.class == String
+          @msgid_exact_map = load_po_object(path)
+          @msgid_normalized_map = {}
+          @msgid_exact_map.each do |entry|
+            if entry.msgid.is_a?(String)
               normalized_message_id = entry.msgid.gsub(".\n", ".  ").gsub("\n", " ")
-              @secondary_index[normalized_message_id] = entry
+              @msgid_normalized_map[normalized_message_id] = entry
             end
           end
           header = GetText::POEntry.new(:normal)
@@ -35,8 +36,8 @@ Content-Transfer-Encoding: 8bit
 X-Generator: jekyll-l10n
           EOS
 
-          unless @po.has_key?(header.msgid)
-            @po[header.msgid] = header
+          unless @msgid_exact_map.has_key?(header.msgid)
+            @msgid_exact_map[header.msgid] = header
           end
 
         end
@@ -47,13 +48,8 @@ X-Generator: jekyll-l10n
           if key.nil? || key.empty?
             return nil
           end
-          if @po.has_key? key
-            entry = @po[nil, key]
-            if entry.fuzzy?
-              return nil
-            else
-              return @po[nil, key].msgstr
-            end
+          if @msgid_exact_map.has_key? key
+            @msgid_exact_map[nil, key]
           else
             logger.warn("msgid #{key.inspect} is not found in the po file.")
             nil
@@ -61,34 +57,57 @@ X-Generator: jekyll-l10n
         end
 
 
-        def update_entries(sentences)
+        def update_entries(units)
           entries = []
-          sentences.each do |sentence|
-            entry = @po[sentence.text]
+          units.each do |unit|
+            entry = @msgid_exact_map[unit.text]
             if entry.nil?
-              entry = @secondary_index[sentence.text]
+              entry = @msgid_normalized_map[unit.text]
+              if entry
+                # Found via normalized map - update msgid to match current upstream text
+                # while preserving the translation (msgstr)
+                entry.msgid = unit.text
+              end
             end
 
             if entry.nil?
               entry = GetText::POEntry.new(:normal)
-              entry.msgid = sentence.text
+              entry.msgid = unit.text
             end
 
-            entry.references = [sentence.source]
+            entry.references = [unit.source_path]
+
+            # Set type comment
+            type_comment = unit.type_comment
+            if type_comment
+              entry.extracted_comment = merge_extracted_comment(entry.extracted_comment, type_comment)
+            end
+
             entries.append(entry)
           end
 
 
-          po = GetText::PO.new(@po.order)
-          po[""] = @po[""] # copy header
+          po = GetText::PO.new(@msgid_exact_map.order)
+          po[""] = @msgid_exact_map[""] # copy header
           entries.each do |entry|
             po[entry.msgid] = entry
           end
-          @po = po
+          @msgid_exact_map = po
+        end
+
+        private def merge_extracted_comment(existing_comment, type_comment)
+          return type_comment if existing_comment.nil? || existing_comment.empty?
+
+          # Remove old type: line if present, keep other lines (e.g., mt: gemini)
+          lines = existing_comment.split("\n")
+          non_type_lines = lines.reject { |line| line.start_with?("type:") }
+
+          # Prepend new type comment
+          [type_comment, *non_type_lines].join("\n")
         end
 
         def write(file)
-          file.write(@po.to_s)
+          file.write(@msgid_exact_map.to_s)
         end
 
         def inspect

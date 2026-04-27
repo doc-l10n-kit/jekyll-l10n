@@ -1,17 +1,17 @@
 # frozen_string_literal: true
 
-require_relative 'abstract_sentence'
+require_relative 'translatable_unit'
 
 module Jekyll
   module L10n
     module Model
-      class DocumentSynopsis < Sentence
+      class DocumentSynopsis < TranslatableUnit
 
         def initialize(jekyll_document)
           @jekyll_document = jekyll_document
         end
 
-        def source
+        def source_path
           file = @jekyll_document.data['document'].attributes['docfile']
           site_source = @jekyll_document.data['document'].attributes['site-source']
           Pathname(file).relative_path_from(site_source).to_path
@@ -27,6 +27,10 @@ module Jekyll
 
         def text=(value)
           @jekyll_document.data['synopsis'] = value
+        end
+
+        def type_comment
+          "type: YAML Front Matter: synopsis"
         end
 
       end

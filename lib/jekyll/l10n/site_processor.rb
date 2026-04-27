@@ -27,18 +27,18 @@ module Jekyll
               asciidoctor_document = jekyll_document.data['document']
               asciidoc = Jekyll::L10n::Model::Asciidoc.new(asciidoctor_document)
 
-              sentences =
-                extract_document_sentences(jekyll_document) + asciidoc.extract_sentences
+              units =
+                extract_document_units(jekyll_document) + asciidoc.extract_units
 
-              sentences.each do |sentence|
-                sentence_document_path = sentence.source
-                po_file_path = Jekyll::L10n::Util.resolve_po_path(sentence_document_path, @jekyll_l10n_config.po_base_dir).to_path
+              units.each do |unit|
+                unit_document_path = unit.source_path
+                po_file_path = Jekyll::L10n::Util.resolve_po_path(unit_document_path, @jekyll_l10n_config.po_base_dir).to_path
                 list = map[po_file_path]
                 if list.nil?
                   list = []
                   map[po_file_path] = list
                 end
-                list.append(sentence)
+                list.append(unit)
               end
             end
           rescue => e
@@ -53,18 +53,18 @@ module Jekyll
               asciidoctor_document = Asciidoctor.load_file(jekyll_page.path, attributes: {'site-source' => @site.source} )
               asciidoc = Jekyll::L10n::Model::Asciidoc.new(asciidoctor_document)
 
-              sentences =
-                extract_page_sentences(jekyll_page) + asciidoc.extract_sentences
+              units =
+                extract_page_units(jekyll_page) + asciidoc.extract_units
 
-              sentences.each do |sentence|
-                sentence_document_path = sentence.source
-                po_file_path = Jekyll::L10n::Util.resolve_po_path(sentence_document_path, @jekyll_l10n_config.po_base_dir).to_path
+              units.each do |unit|
+                unit_document_path = unit.source_path
+                po_file_path = Jekyll::L10n::Util.resolve_po_path(unit_document_path, @jekyll_l10n_config.po_base_dir).to_path
                 list = map[po_file_path]
                 if list.nil?
                   list = []
                   map[po_file_path] = list
                 end
-                list.append(sentence)
+                list.append(unit)
               end
             end
           rescue => e
@@ -90,16 +90,16 @@ module Jekyll
         end
       end
 
-      def extract_document_sentences(jekyll_document)
+      def extract_document_units(jekyll_document)
         [ Jekyll::L10n::Model::DocumentTitle.new(jekyll_document),
           Jekyll::L10n::Model::DocumentSynopsis.new(jekyll_document) ]
-          .filter{ |sentence| sentence.text.nil? == false }
+          .filter{ |unit| !unit.text.nil? }
       end
 
-      def extract_page_sentences(jekyll_page)
+      def extract_page_units(jekyll_page)
         [ Jekyll::L10n::Model::PageTitle.new(jekyll_page),
           Jekyll::L10n::Model::PageIntro.new(jekyll_page) ]
-          .filter{ |sentence| sentence.text.nil? == false }
+          .filter{ |unit| !unit.text.nil? }
       end
 
     end

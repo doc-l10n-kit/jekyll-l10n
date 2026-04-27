@@ -1,11 +1,11 @@
 # frozen_string_literal: true
 
-require_relative 'abstract_sentence'
+require_relative 'abstract_translatable_unit'
 
 module Jekyll
   module L10n
     module Model
-      class Cell < AbstractSentence
+      class Cell < AbstractTranslatableUnit
 
         def text
           @node.instance_variable_get('@text')
@@ -14,7 +14,11 @@ module Jekyll
         def text=(value)
           @node.instance_variable_set('@text', value)
         end
-        
+
+        def type_comment
+          "type: Table"
+        end
+
       end
     end
   end

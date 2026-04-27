@@ -3,9 +3,9 @@
 module Jekyll
   module L10n
     module Model
-      class Sentence
+      class TranslatableUnit
 
-        def source
+        def source_path
           raise "not implemented"
         end
 
@@ -19,6 +19,10 @@ module Jekyll
 
         def text=(value)
           raise "not implemented"
+        end
+
+        def type_comment
+          nil  # Default: no type comment
         end
 
         def inspect

@@ -22,16 +22,26 @@ module Jekyll
 
       def translate(document)
         asciidoc = Jekyll::L10n::Model::Asciidoc.new(document)
-        sentences = asciidoc.extract_sentences
-        sentences.each do |sentence|
+        accept_mt = @jekyll_l10n_config.accept_mt
+        units = asciidoc.extract_units
+        units.each do |unit|
 
-          po_file_path = Jekyll::L10n::Util.resolve_po_path(sentence.source, @jekyll_l10n_config.po_base_dir)
+          po_file_path = Jekyll::L10n::Util.resolve_po_path(unit.source_path, @jekyll_l10n_config.po_base_dir)
           po = @po_repository.load_file(po_file_path.to_path)
-          translated = po[sentence.text]
-          unless translated.nil?
-            sentence.text = translated
+          next if po.nil?
+          entry = po[unit.text]
+          unless entry.nil?
+            if usable_translation?(entry, accept_mt)
+              unit.text = entry.msgstr
+            end
           end
         end
+      end
+
+      private
+
+      def usable_translation?(entry, accept_mt)
+        entry.translated? && (!entry.fuzzy? || accept_mt.include?(entry.mt))
       end
     end
   end
