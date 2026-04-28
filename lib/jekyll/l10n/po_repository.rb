@@ -11,13 +11,14 @@ module Jekyll
       def initialize(config)
         @po_map = Hash.new
         @po_base_dir = config.po_base_dir
+        @language = config.language
       end
 
       def load_file(path)
         po = @po_map[path.to_sym]
         if po.nil? # new file path
           if Pathname.new(path).exist?
-            po = Jekyll::L10n::Model::Po.new(path, @po_base_dir)
+            po = Jekyll::L10n::Model::Po.load(path, @po_base_dir)
             @po_map[path.to_sym] = po
             return po
           else
@@ -33,7 +34,7 @@ module Jekyll
       end
 
       def create_file(path)
-        po = Jekyll::L10n::Model::Po.new(path, @po_base_dir)
+        po = Jekyll::L10n::Model::Po.create(path, @po_base_dir, @language)
         @po_map[path.to_sym] = po
       end
 

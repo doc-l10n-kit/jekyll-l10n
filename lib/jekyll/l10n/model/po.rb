@@ -10,37 +10,15 @@ module Jekyll
 
         include Asciidoctor::Logging
 
-        def initialize(path, po_base_dir)
-          @path = path
-          @po_base_dir = po_base_dir
-          dirname = Pathname(path).dirname
-          unless dirname.exist?
-            raise "Parent directory #{dirname} doesn't exist."
-          end
-
-          @msgid_exact_map = load_po_object(path)
-          @msgid_normalized_map = {}
-          @msgid_exact_map.each do |entry|
-            if entry.msgid.is_a?(String)
-              normalized_message_id = entry.msgid.gsub(".\n", ".  ").gsub("\n", " ")
-              @msgid_normalized_map[normalized_message_id] = entry
-            end
-          end
-          header = GetText::POEntry.new(:normal)
-          header.msgid = ""
-          header.msgstr = <<-EOS
-Language: ja_JP
-MIME-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 8bit
-X-Generator: jekyll-l10n
-          EOS
-
-          unless @msgid_exact_map.has_key?(header.msgid)
-            @msgid_exact_map[header.msgid] = header
-          end
-
+        def self.load(path, po_base_dir)
+          new(path, po_base_dir)
         end
+
+        def self.create(path, po_base_dir, locale)
+          new(path, po_base_dir, locale: locale)
+        end
+
+        private_class_method :new
 
         attr_reader :path
 
@@ -55,7 +33,6 @@ X-Generator: jekyll-l10n
             nil
           end
         end
-
 
         def update_entries(units)
           entries = []
@@ -95,7 +72,49 @@ X-Generator: jekyll-l10n
           @msgid_exact_map = po
         end
 
-        private def merge_extracted_comment(existing_comment, type_comment)
+        def write(file)
+          file.write(@msgid_exact_map.to_s)
+        end
+
+        def inspect
+          @path
+        end
+
+        private
+
+        def initialize(path, po_base_dir, locale: nil)
+          @path = path
+          @po_base_dir = po_base_dir
+          dirname = Pathname(path).dirname
+          unless dirname.exist?
+            raise "Parent directory #{dirname} doesn't exist."
+          end
+
+          @msgid_exact_map = load_po_object(path)
+          @msgid_normalized_map = {}
+          @msgid_exact_map.each do |entry|
+            if entry.msgid.is_a?(String)
+              normalized_message_id = entry.msgid.gsub(".\n", ".  ").gsub("\n", " ")
+              @msgid_normalized_map[normalized_message_id] = entry
+            end
+          end
+
+          unless @msgid_exact_map.has_key?("")
+            raise ArgumentError, "locale is required when creating a new PO file: #{path}" if locale.nil?
+            header = GetText::POEntry.new(:normal)
+            header.msgid = ""
+            header.msgstr = <<~EOS
+              Language: #{locale}
+              MIME-Version: 1.0
+              Content-Type: text/plain; charset=UTF-8
+              Content-Transfer-Encoding: 8bit
+              X-Generator: jekyll-l10n
+            EOS
+            @msgid_exact_map[header.msgid] = header
+          end
+        end
+
+        def merge_extracted_comment(existing_comment, type_comment)
           return type_comment if existing_comment.nil? || existing_comment.empty?
 
           # Remove old type: line if present, keep other lines (e.g., mt: gemini)
@@ -106,15 +125,7 @@ X-Generator: jekyll-l10n
           [type_comment, *non_type_lines].join("\n")
         end
 
-        def write(file)
-          file.write(@msgid_exact_map.to_s)
-        end
-
-        def inspect
-          @path
-        end
-
-        private def load_po_object(path)
+        def load_po_object(path)
           po = GetText::PO.new
           if Pathname.new(path).exist?
               parser = GetText::POParser.new

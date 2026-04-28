@@ -20,6 +20,10 @@ module Jekyll
         @jekyll_config&.[]('l10n')&.[]('po')&.[]('base_dir') || @jekyll_config&.[]('l10n')&.[]('po')&.[]('baseDir') || ENV['L10N_PO_BASE_DIR']
       end
 
+      def language
+        @jekyll_config&.[]('l10n')&.[]('language') || ENV['L10N_LANGUAGE']
+      end
+
       def accept_mt
         value = @jekyll_config&.[]('l10n')&.[]('accept_mt') || ENV['ACCEPT_MT']
         return [] if value.nil? || value.empty?
