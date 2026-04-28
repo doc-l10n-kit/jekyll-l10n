@@ -14,6 +14,10 @@ class TestConfig
     Pathname.new("sample/po").expand_path(File.dirname(File.dirname(__FILE__))).to_path
   end
 
+  def language
+    "ja_JP"
+  end
+
   def accept_mt
     @accept_mt || []
   end
